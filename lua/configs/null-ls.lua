@@ -1,5 +1,21 @@
 local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
 local null_ls = require("null-ls")
+local format_on_save = true
+
+-- Función para desactivar el formateo y guardar el archivo
+local function save_without_format()
+  format_on_save = false
+  vim.cmd('write')
+  format_on_save = true
+end
+
+vim.api.nvim_create_user_command(
+  "SaveWithoutFormat",
+  function ()
+    save_without_format()
+  end,
+  { nargs = 0 }
+)
 
 local opts = {
   sources = {
@@ -16,7 +32,9 @@ local opts = {
         group = augroup,
         buffer = bufnr,
         callback = function ()
-          vim.lsp.buf.format({ bufnr = bufnr })
+          if format_on_save then
+            vim.lsp.buf.format({ bufnr = bufnr })
+          end
         end,
       })
     end
